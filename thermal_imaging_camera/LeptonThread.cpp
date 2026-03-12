@@ -119,7 +119,7 @@ void LeptonThread::run()
 	uint16_t n_zero_value_drop_frame = 0;
 
 	//open spi port
-	SpiOpenPort(0, spiSpeed);
+	SpiOpenPort(1, spiSpeed);
 
 	while(true) {
 
@@ -128,7 +128,7 @@ void LeptonThread::run()
 		int segmentNumber = -1;
 		for(int j=0;j<PACKETS_PER_FRAME;j++) {
 			//if it's a drop packet, reset j to 0, set to -1 so he'll be at 0 again loop
-			read(spi_cs0_fd, result+sizeof(uint8_t)*PACKET_SIZE*j, sizeof(uint8_t)*PACKET_SIZE);
+			read(spi_cs1_fd, result+sizeof(uint8_t)*PACKET_SIZE*j, sizeof(uint8_t)*PACKET_SIZE);
 			int packetNumber = result[j*PACKET_SIZE+1];
 			if(packetNumber != j) {
 				j = -1;
@@ -270,7 +270,7 @@ void LeptonThread::run()
 	}
 	
 	//finally, close SPI port just bcuz
-	SpiClosePort(0);
+	SpiClosePort(1);
 }
 
 void LeptonThread::performFFC() {

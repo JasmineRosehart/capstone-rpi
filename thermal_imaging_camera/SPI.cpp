@@ -5,7 +5,7 @@ int spi_cs1_fd = -1;
 
 unsigned char spi_mode = SPI_MODE_3;
 unsigned char spi_bitsPerWord = 8;
-unsigned int spi_speed = 10000000;
+unsigned int spi_speed = 18000000;
 
 int SpiOpenPort (int spi_device, unsigned int useSpiSpeed)
 {
@@ -97,13 +97,20 @@ int SpiClosePort(int spi_device)
 		spi_cs_fd = &spi_cs1_fd;
 	else
 		spi_cs_fd = &spi_cs0_fd;
+		
+		
+	if (*spi_cs_fd<0){
+		perror("Error - spi_cs_fd<0");
+		return 0;
+	}
 
 
 	status_value = close(*spi_cs_fd);
 	if(status_value < 0)
 	{
 		perror("Error - Could not close SPI device");
-		exit(1);
+		*spi_cs_fd =-1;
+		return status_value;
 	}
 	return(status_value);
 }
