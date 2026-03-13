@@ -121,9 +121,16 @@ int main( int argc, char **argv )
 	myLabel.setPixmap(QPixmap::fromImage(myImage));
 
 	//create a FFC button
+	/*
 	QPushButton *button1 = new QPushButton("Perform FFC", myWidget);
 	button1->setGeometry(320/2-50, 290-35, 100, 30);
-
+	*/
+	
+	//create capture button
+	QPushButton *saveButton = new QPushButton("Capture Image", myWidget);
+	saveButton->setGeometry(320/2 -50, 290-35, 100, 30);
+	
+	
 	//create a thread to gather SPI data
 	//when the thread emits updateImage, the label should update its image accordingly
 	LeptonThread *thread = new LeptonThread();
@@ -135,10 +142,13 @@ int main( int argc, char **argv )
 	if (0 <= rangeMin) thread->useRangeMinValue(rangeMin);
 	if (0 <= rangeMax) thread->useRangeMaxValue(rangeMax);
 	QObject::connect(thread, SIGNAL(updateImage(QImage)), &myLabel, SLOT(setImage(QImage)));
-	
+	QObject::connect(saveButton, SIGNAL(clicked()), thread, SLOT(saveCurrentFrame()));
 	//connect ffc button to the thread's ffc action
+	/*
 	QObject::connect(button1, SIGNAL(clicked()), thread, SLOT(performFFC()));
-	thread->start();
+	*/
+	
+	thread->start(); 
 	
 	myWidget->show();
 

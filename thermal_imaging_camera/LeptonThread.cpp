@@ -264,6 +264,11 @@ void LeptonThread::run()
 			log_message(8, "[WARNING] Found zero-value. Drop the frame continuously " + std::to_string(n_zero_value_drop_frame) + " times [RECOVERED]");
 			n_zero_value_drop_frame = 0;
 		}
+		
+		frameMutex.lock();
+		lastFrame = myImage.copy();
+		frameMutex.unlock();
+				
 
 		//lets emit the signal for update
 		emit updateImage(myImage);
@@ -272,6 +277,22 @@ void LeptonThread::run()
 	//finally, close SPI port just bcuz
 	SpiClosePort(1);
 }
+
+void LeptonThread::saveCurrentFrame(){
+	std::cout << "Button Pressed!" << std::endl;
+	frameMutex.lock();
+	if (!lastFrame.isNull()){
+		QString filename = QString("capture%1.jpg").arg(QDateTime::currentDateTime().toString("yyyyMMdd_hhmmss"));
+		
+		if(lastFrame.save(filename, "JPG")){
+			std::cout << "Saved: " << filename.toStdString() << std::endl;
+		} else {
+			std::cerr << "Failed to save image!" << std::endl;
+		}
+	}
+	frameMutex.unlock();
+}
+
 
 void LeptonThread::performFFC() {
 	//perform FFC

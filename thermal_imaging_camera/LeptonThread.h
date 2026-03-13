@@ -33,6 +33,7 @@ public:
 
 public slots:
   void performFFC();
+  void saveCurrentFrame();
 
 signals:
   void updateText(QString);
@@ -54,6 +55,8 @@ private:
   int myImageWidth;
   int myImageHeight;
   QImage myImage;
+  QImage lastFrame;
+  QMutex frameMutex;
 
   uint8_t result[PACKET_SIZE*PACKETS_PER_FRAME];
   uint8_t shelf[4][PACKET_SIZE*PACKETS_PER_FRAME];
