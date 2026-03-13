@@ -4,6 +4,7 @@
 #include <QThread>
 #include <QImage>
 #include <stdint.h>
+#include <vector>
 
 class RGBThread : public QThread
 {
