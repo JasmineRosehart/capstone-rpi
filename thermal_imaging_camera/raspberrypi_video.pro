@@ -26,5 +26,7 @@ SOURCES += *.cpp
 
 unix:LIBS += -L$${RPI_LIBS}/$${LEPTONSDK}/Debug -lLEPTON_SDK
 
+unix:LIBS += -lv4l2
+
 unix:QMAKE_CLEAN += -r $(OBJECTS_DIR) $${MOC_DIR}
 

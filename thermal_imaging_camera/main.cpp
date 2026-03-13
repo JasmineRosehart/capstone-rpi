@@ -12,6 +12,9 @@
 #include "LeptonThread.h"
 #include "MyLabel.h"
 
+#include "RGBThread.h"
+
+
 void printUsage(char *cmd) {
         char *cmdname = basename(cmd);
 	printf("Usage: %s [OPTION]...\n"
@@ -119,6 +122,19 @@ int main( int argc, char **argv )
 	MyLabel myLabel(myWidget);
 	myLabel.setGeometry(10, 10, 320, 240);
 	myLabel.setPixmap(QPixmap::fromImage(myImage));
+
+	// Add a second MyLabel for the RGB feed and wire up the new thread
+	MyLabel rgbLabel(myWidget);
+	rgbLabel.setGeometry(340, 10, 640, 480);   // place it to the right of thermal
+
+	// Resize window to fit both
+	myWidget->setGeometry(400, 300, 990, 520);
+
+	// Create and connect RGB thread
+	RGBThread *rgbThread = new RGBThread();
+	QObject::connect(rgbThread, SIGNAL(updateRGBImage(QImage)), &rgbLabel, SLOT(setImage(QImage)));
+	rgbThread->start();
+	
 
 	//create a FFC button
 	QPushButton *button1 = new QPushButton("Perform FFC", myWidget);
