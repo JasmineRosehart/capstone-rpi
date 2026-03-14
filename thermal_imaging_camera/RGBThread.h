@@ -3,6 +3,7 @@
 
 #include <QThread>
 #include <QImage>
+#include <QMutex>
 #include <stdint.h>
 #include <vector>
 
@@ -27,6 +28,9 @@ private:
     int width;
     int height;
     bool uploadToS3(const std::string& filename);
+
+    QImage lastFrame;
+    QMutex frameMutex;
 };
 
 #endif
