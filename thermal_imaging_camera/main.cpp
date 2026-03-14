@@ -12,6 +12,11 @@
 #include "LeptonThread.h"
 #include "MyLabel.h"
 
+#include "RGBThread.h"
+
+#include <signal.h>
+
+
 void printUsage(char *cmd) {
         char *cmdname = basename(cmd);
 	printf("Usage: %s [OPTION]...\n"
@@ -40,6 +45,8 @@ void printUsage(char *cmd) {
 
 int main( int argc, char **argv )
 {
+	signal(SIGPIPE, SIG_IGN); // prevent rpicam-vid pipe crash
+
 	int typeColormap = 3; // colormap_ironblack
 	int typeLepton = 2; // Lepton 2.x
 	int spiSpeed = 20; // SPI bus speed 20MHz
@@ -117,8 +124,21 @@ int main( int argc, char **argv )
 
 	//create a label, and set it's image to the placeholder
 	MyLabel myLabel(myWidget);
-	myLabel.setGeometry(10, 10, 320, 240);
+	myLabel.setGeometry(10, 10, 640, 480);
 	myLabel.setPixmap(QPixmap::fromImage(myImage));
+
+	// Add a second MyLabel for the RGB feed and wire up the new thread
+	MyLabel rgbLabel(myWidget);
+	rgbLabel.setGeometry(660, 10, 640, 480);  // place it to the right of thermal
+
+	// Resize window to fit both
+	myWidget->setGeometry(400, 300, 1310, 530);
+
+	// Create and connect RGB thread
+	RGBThread *rgbThread = new RGBThread();
+	QObject::connect(rgbThread, SIGNAL(updateRGBImage(QImage)), &rgbLabel, SLOT(setImage(QImage)));
+	rgbThread->start();
+
 
 	//create a FFC button
 	/*
@@ -128,7 +148,7 @@ int main( int argc, char **argv )
 	
 	//create capture button
 	QPushButton *saveButton = new QPushButton("Capture Image", myWidget);
-	saveButton->setGeometry(320/2 -50, 290-35, 100, 30);
+	saveButton->setGeometry(640/2-50, 490, 100, 30);
 	
 	
 	//create a thread to gather SPI data
