@@ -12,11 +12,14 @@ Part of a larger capstone project integrating thermal imaging, RGB camera, GPS, 
 | Raspberry Pi | 3B |
 | Thermal Camera | FLIR Lepton 3.5 |
 | Breakout Board | FLIR Lepton Camera Breakout Board v2.0 (PN: 250-0577-00) |
+| RGB Camera | Raspberry Pi Camera Module 2 (IMX219) |
 | OS | Debian GNU/Linux 13 (Trixie) |
 
 ---
 
 ## GPIO Wiring
+
+### Lepton 3.5 Thermal Camera
 
 | Breakout Board Pin | Raspberry Pi Pin | Physical Pin |
 |---|---|---|
@@ -29,6 +32,15 @@ Part of a larger capstone project integrating thermal imaging, RGB camera, GPS, 
 | SPI_CS | SPI0 **CE1** | Pin **26** |
 
 > **Important:** Use CE1 (Pin 26), NOT CE0 (Pin 24). The code uses `/dev/spidev0.1`.
+
+### Pi Camera Module 2
+
+Connect the ribbon cable into the **CSI port** (the long thin connector between the HDMI and headphone jack on the Pi):
+- Power off the Pi before connecting
+- Lift the plastic latch on the CSI port
+- Slide the ribbon cable in with the **blue side facing toward the HDMI port**
+- Press the latch back down firmly
+- Power the Pi back on
 
 ---
 
@@ -51,7 +63,7 @@ ls /dev/i2c*
 # Expected: /dev/i2c-1  /dev/i2c-2
 ```
 
-### 3. Verify camera is detected on I2C
+### 3. Verify Lepton is detected on I2C
 ```bash
 sudo apt-get install i2c-tools
 sudo i2cdetect -y 1
@@ -75,6 +87,41 @@ sudo reboot
 sudo apt-get update
 sudo apt-get install qtbase5-dev qtchooser qt5-qmake qtbase5-dev-tools
 ```
+
+### 6. Enable the Pi Camera Module 2 (Debian Trixie)
+
+> **Note:** On Debian Trixie, `raspi-config` does not show a "Legacy Camera" option. Enable the camera manually via config.txt instead.
+
+```bash
+sudo nano /boot/firmware/config.txt
+```
+Add this line at the bottom:
+```
+start_x=1
+```
+Save and reboot:
+```bash
+sudo reboot
+```
+
+### 7. Install rpicam-apps and verify camera detection
+
+On Debian Trixie, the camera tools are named `rpicam-*` (not `libcamera-*`):
+```bash
+sudo apt install rpicam-apps
+```
+
+Verify the camera is detected:
+```bash
+rpicam-hello --list-cameras
+```
+
+You should see output like:
+```
+0 : imx219 [3280x2464 10-bit RGGB] (/base/soc/i2c0mux/i2c@1/imx219@10)
+```
+
+If `rpicam-hello` is not found after install, make sure you are **not inside a Python virtual environment**. Run `deactivate` first, then retry.
 
 ---
 
@@ -122,16 +169,33 @@ sudo ./raspberrypi_video -tl 3
 ## Troubleshooting
 
 ### Red box in top left corner
-The app is running but getting no valid data from the camera. Check:
+The app is running but getting no valid data from the thermal camera. Check:
 1. Wiring — especially that CS is on CE1 (Pin 26) not CE0 (Pin 24)
 2. SPI is enabled: `ls /dev/spi*` should show `/dev/spidev0.1`
-3. Camera detected on I2C: `sudo i2cdetect -y 1` should show `0x2A`
+3. Lepton detected on I2C: `sudo i2cdetect -y 1` should show `0x2A`
 4. SPI buffer size is set in `/boot/firmware/cmdline.txt`
 
-### All yellow image
+### All yellow thermal image
 Camera is connected but sending invalid/zero data. Usually means:
 1. SPI port mismatch — verify code uses `spi_cs1_fd` not `spi_cs0_fd`
 2. Wrong SPI mode — verify `SPI_MODE_3` is set in `SPI.cpp`
+
+### RGB camera feed not showing
+1. Verify camera is detected: `rpicam-hello --list-cameras` should show `imx219`
+2. If not detected, check the ribbon cable is fully seated in the CSI port
+3. Verify `start_x=1` is in `/boot/firmware/config.txt`
+4. Check that `rpicam-vid` is available: `which rpicam-vid`
+
+### `rpicam-hello: command not found` after installing rpicam-apps
+You are likely inside a Python virtual environment. Run:
+```bash
+deactivate
+sudo apt install rpicam-apps
+rpicam-hello --list-cameras
+```
+
+### `libcamera0` package not found
+On Debian Trixie, `libcamera0` has been replaced by versioned packages (`libcamera0.7`, etc.) and the app suite renamed to `rpicam-*`. Do not use `libcamera-apps` — use `rpicam-apps` instead.
 
 ### Video drops out after ~1 minute
 1. Check for loose jumper wires — this is the most common cause
@@ -150,13 +214,14 @@ Normal behaviour for Lepton 3.5 — the camera occasionally sends discard packet
 ## Project Structure
 
 ```
-raspberrypi_video/
+thermal_imaging_camera/
 ├── main.cpp              # Qt app entry point, argument parsing, UI setup
 ├── LeptonThread.cpp/h    # SPI read loop, frame processing, image output
 ├── Lepton_I2C.cpp/h      # I2C commands (FFC, reboot) via Lepton SDK
 ├── SPI.cpp/h             # Low-level SPI port open/close/configure
 ├── MyLabel.cpp/h         # Qt label widget with image update slot
 ├── Palettes.cpp/h        # Colormaps: rainbow, grayscale, ironblack
+├── RGBThread.cpp/h       # Pi Camera Module 2 capture via rpicam-vid pipe
 ├── raspberrypi_video.pro # Qt project file
 └── README.md             # This file
 ```
