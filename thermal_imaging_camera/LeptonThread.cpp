@@ -299,35 +299,22 @@ void LeptonThread::saveCurrentFrame(){
 }
 
 bool LeptonThread::uploadToS3(const std::string& filename) {
-    Aws::SDKOptions options;
-    Aws::InitAPI(options);
-    bool success = false;
+    // Construct the command to upload the file into your specific bucket path
+    // The bucket is 'fire-ml-bucket' and the folder is 'inputs/ir-images/'
+    std::string command = "aws s3 cp " + filename + 
+                          " s3://fire-ml-bucket/inputs/ir-images/" + filename + 
+                          " --region us-east-2";
 
-    {
-        Aws::Client::ClientConfiguration config;
-        config.region = "us-east-2"; // Change to your bucket region
-
-        Aws::S3::S3Client s3_client(config);
-        Aws::S3::Model::PutObjectRequest request;
-        request.SetBucket("fire-ml-bucket");
-        std::string s3_key = "inputs/ir-images/" + filename;
-        request.SetKey(s3_key.c_str());
-
-        auto input_data = Aws::MakeShared<Aws::FStream>("SampleAllocationTag", 
-                            filename.c_str(), std::ios_base::in | std::ios_base::binary);
-
-        request.SetBody(input_data);
-
-        auto outcome = s3_client.PutObject(request);
-        if (outcome.IsSuccess()) {
-            success = true;
-        } else {
-            std::cerr << "S3 Error: " << outcome.GetError().GetMessage() << std::endl;
-        }
+    // Run the command. system() returns 0 on success.
+    int result = system(command.c_str());
+    
+    if (result == 0) {
+        std::cout << "Successfully uploaded " << filename << " to S3." << std::endl;
+        return true;
+    } else {
+        std::cerr << "AWS CLI Error: Failed to upload. Return code: " << result << std::endl;
+        return false;
     }
-
-    Aws::ShutdownAPI(options);
-    return success;
 }
 
 
