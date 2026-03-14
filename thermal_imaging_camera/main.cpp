@@ -163,6 +163,15 @@ int main( int argc, char **argv )
 	if (0 <= rangeMax) thread->useRangeMaxValue(rangeMax);
 	QObject::connect(thread, SIGNAL(updateImage(QImage)), &myLabel, SLOT(setImage(QImage)));
 	QObject::connect(saveButton, SIGNAL(clicked()), thread, SLOT(saveCurrentFrame()));
+	QObject::connect(saveButton, SIGNAL(clicked()), rgbThread, SLOT(saveCurrentFrame()));
+	
+	
+	QObject::connect(saveButton, &QPushButton::clicked, [thread, rgbThread]() {
+		QString timestamp = QDateTime::currentDateTime().toString("yyyyMMdd_hhmmss");
+		
+		thread->saveCurrentFrame(timestamp);
+		rgbThread->saveCurrentFrame(timestamp);
+	}	
 	//connect ffc button to the thread's ffc action
 	/*
 	QObject::connect(button1, SIGNAL(clicked()), thread, SLOT(performFFC()));

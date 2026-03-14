@@ -16,6 +16,9 @@ public:
     void stop();
     void run() override;
 
+public slots:
+    void saveCurrentFrame();
+
 signals:
     void updateRGBImage(QImage);
 
@@ -23,6 +26,7 @@ private:
     bool running;
     int width;
     int height;
+    bool uploadToS3(const std::string& filename);
 };
 
 #endif

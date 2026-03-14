@@ -57,9 +57,38 @@ void RGBThread::run() {
                 row[x*3+2] = clamp(Yval + 1.772  * Uval);
             }
         }
+        
+        frameMutex.lock();
+        lastFrame = frame.copy();
+        frameMutex.unlock();
 
         emit updateRGBImage(frame);
     }
 
     pclose(pipe);
+}
+
+void RGBThread::saveCurrentFrame(){
+    frameMutex.lock();
+    if(!lastFrame.isNull()){
+        QDir().mkdir("rgb_images");
+        QString timestamp = QDateTime::currentDateTime().toString("yyyyMMdd_hhmmss");
+        QString qPath = QString("rgb_images/rgb_%1.jpg").arg(timestamp);
+        
+        if(lastFrame.save(qPath, "JPG")){
+            std::cout << "RGB Saved: " << qPath.toStdString() << std::endl;
+        }
+        
+    }
+    frameMutex.unlock();    
+}
+
+bool RGBThread::uploadToS3(const std:: string& filename){
+    std
+    
+    
+    
+    
+    
+    
 }
