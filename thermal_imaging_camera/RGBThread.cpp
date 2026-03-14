@@ -68,27 +68,42 @@ void RGBThread::run() {
     pclose(pipe);
 }
 
-void RGBThread::saveCurrentFrame(){
+void RGBThread::saveCurrentFrame() {
     frameMutex.lock();
-    if(!lastFrame.isNull()){
+    if (!lastFrame.isNull()) {
+        // Ensure the local folder exists
         QDir().mkdir("rgb_images");
-        QString timestamp = QDateTime::currentDateTime().toString("yyyyMMdd_hhmmss");
-        QString qPath = QString("rgb_images/rgb_%1.jpg").arg(timestamp);
+
+        QString qPath = QString("rgb_images/rgb_%1.jpg")
+                        .arg(QDateTime::currentDateTime().toString("yyyyMMdd_hhmmss"));
         
-        if(lastFrame.save(qPath, "JPG")){
-            std::cout << "RGB Saved: " << qPath.toStdString() << std::endl;
+        std::string localFile = qPath.toStdString();
+
+        if (lastFrame.save(qPath, "JPG")) {
+            std::cout << "RGB Saved locally: " << localFile << std::endl;
+
+            // Trigger the upload
+            uploadToS3(localFile);
         }
-        
     }
-    frameMutex.unlock();    
+    frameMutex.unlock();
 }
 
-bool RGBThread::uploadToS3(const std:: string& filename){
-    std
+bool RGBThread::uploadToS3(const std::string& filename) {
+    // Construct the command
+    // We point to the 'rgb-images' folder in your bucket
+    std::string command = "aws s3 cp " + filename + 
+                          " s3://fire-ml-bucket/inputs/rgb-images/" + 
+                          " --region us-east-2";
+
+    // Run the command
+    int result = system(command.c_str());
     
-    
-    
-    
-    
-    
+    if (result == 0) {
+        std::cout << "[RGB] Successfully uploaded to S3." << std::endl;
+        return true;
+    } else {
+        std::cerr << "[RGB] AWS CLI Error: " << result << std::endl;
+        return false;
+    }
 }

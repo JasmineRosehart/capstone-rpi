@@ -171,7 +171,7 @@ int main( int argc, char **argv )
 		
 		thread->saveCurrentFrame(timestamp);
 		rgbThread->saveCurrentFrame(timestamp);
-	}	
+	});
 	//connect ffc button to the thread's ffc action
 	/*
 	QObject::connect(button1, SIGNAL(clicked()), thread, SLOT(performFFC()));
