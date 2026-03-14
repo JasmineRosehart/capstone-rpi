@@ -1,6 +1,8 @@
 #include "RGBThread.h"
 #include <iostream>
 #include <cstring>
+#include <QDir>
+#include <QDateTime>
 
 RGBThread::RGBThread() : QThread(), running(false), width(640), height(480) {}
 RGBThread::~RGBThread() {}
