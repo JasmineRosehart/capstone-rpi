@@ -282,10 +282,21 @@ void LeptonThread::saveCurrentFrame() {
     std::cout << "Button Pressed!" << std::endl;
     frameMutex.lock();
     if (!lastFrame.isNull()) {
-        // 1. Create the QString for Qt functions
-        QString qPath = QString("capture_%1.jpg").arg(QDateTime::currentDateTime().toString("yyyyMMdd_hhmmss"));
+		// 1. Define the directory name
+        QString dirName = "ir_images";
+
+        // 2. Create the directory if it doesn't exist
+        QDir dir;
+        if (!dir.exists(dirName)) {
+            dir.mkdir(dirName);
+        }
+
+        // 3. Create the path including the folder
+        // Format: ir_images/capture_20260314_152200.jpg
+        QString qPath = QString("%1/capture_%2.jpg")
+                        .arg(dirName)
+                        .arg(QDateTime::currentDateTime().toString("yyyyMMdd_hhmmss"));
         
-        // 2. Convert to std::string for the S3/System call
         std::string localFile = qPath.toStdString();
 
         // Use the QString version here
