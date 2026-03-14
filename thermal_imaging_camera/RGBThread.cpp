@@ -68,21 +68,18 @@ void RGBThread::run() {
     pclose(pipe);
 }
 
-void RGBThread::saveCurrentFrame() {
+void RGBThread::saveCurrentFrame(QString timestamp) {
     frameMutex.lock();
     if (!lastFrame.isNull()) {
-        // Ensure the local folder exists
         QDir().mkdir("rgb_images");
 
-        QString qPath = QString("rgb_images/rgb_%1.jpg")
-                        .arg(QDateTime::currentDateTime().toString("yyyyMMdd_hhmmss"));
+        // Use the 'timestamp' passed from the lambda instead of calling QDateTime again
+        QString qPath = QString("rgb_images/rgb_%1.jpg").arg(timestamp);
         
         std::string localFile = qPath.toStdString();
 
         if (lastFrame.save(qPath, "JPG")) {
-            std::cout << "RGB Saved locally: " << localFile << std::endl;
-
-            // Trigger the upload
+            std::cout << "[RGB] Saved locally: " << localFile << std::endl;
             uploadToS3(localFile);
         }
     }

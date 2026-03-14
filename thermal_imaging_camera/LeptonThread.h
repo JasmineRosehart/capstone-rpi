@@ -34,7 +34,7 @@ public:
 
 public slots:
   void performFFC();
-  void saveCurrentFrame();
+  void saveCurrentFrame(QString timestamp);
 
 signals:
   void updateText(QString);

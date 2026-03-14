@@ -17,7 +17,7 @@ public:
     void run() override;
 
 public slots:
-    void saveCurrentFrame();
+    void saveCurrentFrame(QString timestamp);
 
 signals:
     void updateRGBImage(QImage);

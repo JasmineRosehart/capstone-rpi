@@ -278,37 +278,19 @@ void LeptonThread::run()
 	SpiClosePort(1);
 }
 
-void LeptonThread::saveCurrentFrame() {
-    std::cout << "Button Pressed!" << std::endl;
+void LeptonThread::saveCurrentFrame(QString timestamp) {
     frameMutex.lock();
     if (!lastFrame.isNull()) {
-		// 1. Define the directory name
-        QString dirName = "ir_images";
+        QDir().mkdir("ir_images");
 
-        // 2. Create the directory if it doesn't exist
-        QDir dir;
-        if (!dir.exists(dirName)) {
-            dir.mkdir(dirName);
-        }
-
-        // 3. Create the path including the folder
-        // Format: ir_images/capture_20260314_152200.jpg
-        QString qPath = QString("%1/capture_%2.jpg")
-                        .arg(dirName)
-                        .arg(QDateTime::currentDateTime().toString("yyyyMMdd_hhmmss"));
+        // Use the same shared timestamp
+        QString qPath = QString("ir_images/ir_%1.jpg").arg(timestamp);
         
         std::string localFile = qPath.toStdString();
 
-        // Use the QString version here
         if (lastFrame.save(qPath, "JPG")) {
-            std::cout << "Saved locally: " << localFile << std::endl;
-
-            // Use the std::string version here
-            if (uploadToS3(localFile)) {
-                std::cout << "S3 Upload Complete!" << std::endl;
-            }
-        } else {
-            std::cerr << "Failed to save image locally!" << std::endl;
+            std::cout << "[IR] Saved locally: " << localFile << std::endl;
+            uploadToS3(localFile);
         }
     }
     frameMutex.unlock();
