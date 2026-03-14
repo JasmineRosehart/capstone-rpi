@@ -9,6 +9,11 @@
 #include <QPixmap>
 #include <QImage>
 
+#include <aws/core/Aws.h>
+#include <aws/s3/S3Client.h>
+#include <aws/s3/model/PutObjectRequest.h>
+
+
 #define PACKET_SIZE 164
 #define PACKET_SIZE_UINT16 (PACKET_SIZE/2)
 #define PACKETS_PER_FRAME 60
@@ -41,6 +46,7 @@ signals:
 
 private:
 
+  bool uploadToS3(const std::string& filename);
   void log_message(uint16_t, std::string);
   uint16_t loglevel;
   int typeColormap;

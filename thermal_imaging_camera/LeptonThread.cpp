@@ -283,14 +283,51 @@ void LeptonThread::saveCurrentFrame(){
 	frameMutex.lock();
 	if (!lastFrame.isNull()){
 		QString filename = QString("capture%1.jpg").arg(QDateTime::currentDateTime().toString("yyyyMMdd_hhmmss"));
-		
+		std::string filename = qFilename.toStdString();
+
 		if(lastFrame.save(filename, "JPG")){
 			std::cout << "Saved: " << filename.toStdString() << std::endl;
+
+			if(uploadToS3(filename)){
+				std::cout << "S3 Upload Complete!" << std::endl;
+			}
 		} else {
 			std::cerr << "Failed to save image!" << std::endl;
 		}
 	}
 	frameMutex.unlock();
+}
+
+bool LeptonThread::uploadToS3(const std::string& filename) {
+    Aws::SDKOptions options;
+    Aws::InitAPI(options);
+    bool success = false;
+
+    {
+        Aws::Client::ClientConfiguration config;
+        config.region = "us-east-2"; // Change to your bucket region
+
+        Aws::S3::S3Client s3_client(config);
+        Aws::S3::Model::PutObjectRequest request;
+        request.SetBucket("fire-ml-bucket");
+        std::string s3_key = "inputs/ir-images/" + filename;
+        request.SetKey(s3_key.c_str());
+
+        auto input_data = Aws::MakeShared<Aws::FStream>("SampleAllocationTag", 
+                            filename.c_str(), std::ios_base::in | std::ios_base::binary);
+
+        request.SetBody(input_data);
+
+        auto outcome = s3_client.PutObject(request);
+        if (outcome.IsSuccess()) {
+            success = true;
+        } else {
+            std::cerr << "S3 Error: " << outcome.GetError().GetMessage() << std::endl;
+        }
+    }
+
+    Aws::ShutdownAPI(options);
+    return success;
 }
 
 
