@@ -278,24 +278,29 @@ void LeptonThread::run()
 	SpiClosePort(1);
 }
 
-void LeptonThread::saveCurrentFrame(){
-	std::cout << "Button Pressed!" << std::endl;
-	frameMutex.lock();
-	if (!lastFrame.isNull()){
-		QString filename = QString("capture%1.jpg").arg(QDateTime::currentDateTime().toString("yyyyMMdd_hhmmss"));
-		std::string filename = qFilename.toStdString();
+void LeptonThread::saveCurrentFrame() {
+    std::cout << "Button Pressed!" << std::endl;
+    frameMutex.lock();
+    if (!lastFrame.isNull()) {
+        // 1. Create the QString for Qt functions
+        QString qPath = QString("capture_%1.jpg").arg(QDateTime::currentDateTime().toString("yyyyMMdd_hhmmss"));
+        
+        // 2. Convert to std::string for the S3/System call
+        std::string localFile = qPath.toStdString();
 
-		if(lastFrame.save(filename, "JPG")){
-			std::cout << "Saved: " << filename.toStdString() << std::endl;
+        // Use the QString version here
+        if (lastFrame.save(qPath, "JPG")) {
+            std::cout << "Saved locally: " << localFile << std::endl;
 
-			if(uploadToS3(filename)){
-				std::cout << "S3 Upload Complete!" << std::endl;
-			}
-		} else {
-			std::cerr << "Failed to save image!" << std::endl;
-		}
-	}
-	frameMutex.unlock();
+            // Use the std::string version here
+            if (uploadToS3(localFile)) {
+                std::cout << "S3 Upload Complete!" << std::endl;
+            }
+        } else {
+            std::cerr << "Failed to save image locally!" << std::endl;
+        }
+    }
+    frameMutex.unlock();
 }
 
 bool LeptonThread::uploadToS3(const std::string& filename) {
