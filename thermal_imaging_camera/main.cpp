@@ -46,7 +46,7 @@ void printUsage(char *cmd) {
 int main( int argc, char **argv )
 {
 	signal(SIGPIPE, SIG_IGN); // prevent rpicam-vid pipe crash
-	
+
 	int typeColormap = 3; // colormap_ironblack
 	int typeLepton = 2; // Lepton 2.x
 	int spiSpeed = 20; // SPI bus speed 20MHz
@@ -124,15 +124,15 @@ int main( int argc, char **argv )
 
 	//create a label, and set it's image to the placeholder
 	MyLabel myLabel(myWidget);
-	myLabel.setGeometry(10, 10, 320, 240);
+	myLabel.setGeometry(10, 10, 640, 480);
 	myLabel.setPixmap(QPixmap::fromImage(myImage));
 
 	// Add a second MyLabel for the RGB feed and wire up the new thread
 	MyLabel rgbLabel(myWidget);
-	rgbLabel.setGeometry(340, 10, 640, 480);   // place it to the right of thermal
+	rgbLabel.setGeometry(660, 10, 640, 480);  // place it to the right of thermal
 
 	// Resize window to fit both
-	myWidget->setGeometry(400, 300, 990, 520);
+	myWidget->setGeometry(400, 300, 1310, 530);
 
 	// Create and connect RGB thread
 	RGBThread *rgbThread = new RGBThread();
@@ -142,7 +142,7 @@ int main( int argc, char **argv )
 
 	//create a FFC button
 	QPushButton *button1 = new QPushButton("Perform FFC", myWidget);
-	button1->setGeometry(320/2-50, 290-35, 100, 30);
+	button1->setGeometry(640/2-50, 490, 100, 30);
 
 	//create a thread to gather SPI data
 	//when the thread emits updateImage, the label should update its image accordingly
