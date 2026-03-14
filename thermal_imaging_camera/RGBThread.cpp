@@ -15,7 +15,7 @@ void RGBThread::run() {
     // Use rpicam-vid to pipe raw RGB to stdout
     FILE *pipe = popen(
         "rpicam-vid --width 640 --height 480 --codec yuv420 "
-        "--framerate 15 --timeout 0 --nopreview -o -",
+        "--framerate 10 --timeout 0 --nopreview -o - 2>/dev/null",
         "r"
     );
 

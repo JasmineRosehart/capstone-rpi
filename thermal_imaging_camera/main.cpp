@@ -14,6 +14,8 @@
 
 #include "RGBThread.h"
 
+#include <signal.h>
+
 
 void printUsage(char *cmd) {
         char *cmdname = basename(cmd);
@@ -43,6 +45,8 @@ void printUsage(char *cmd) {
 
 int main( int argc, char **argv )
 {
+	signal(SIGPIPE, SIG_IGN); // prevent rpicam-vid pipe crash
+	
 	int typeColormap = 3; // colormap_ironblack
 	int typeLepton = 2; // Lepton 2.x
 	int spiSpeed = 20; // SPI bus speed 20MHz
@@ -134,7 +138,7 @@ int main( int argc, char **argv )
 	RGBThread *rgbThread = new RGBThread();
 	QObject::connect(rgbThread, SIGNAL(updateRGBImage(QImage)), &rgbLabel, SLOT(setImage(QImage)));
 	rgbThread->start();
-	
+
 
 	//create a FFC button
 	QPushButton *button1 = new QPushButton("Perform FFC", myWidget);
