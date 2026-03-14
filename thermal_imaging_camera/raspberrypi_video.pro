@@ -8,8 +8,6 @@ TARGET = raspberrypi_video
 RPI_LIBS = ../raspberrypi_libs
 LEPTONSDK = leptonSDKEmb32PUB
 
-LIBS += -laws-cpp-sdk-s3 -laws-cpp-sdk-core
-
 PRE_TARGETDEPS += sdk
 QMAKE_EXTRA_TARGETS += sdk sdkclean
 sdk.commands = make -C $${RPI_LIBS}/$${LEPTONSDK}
