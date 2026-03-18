@@ -113,22 +113,22 @@ int main( int argc, char **argv )
     // GPS status label (bottom, full width)
     QLabel *gpsLabel = new QLabel("GPS: fetching...", myWidget);
     gpsLabel->setGeometry(10, 500, 1290, 25);
-    gpsLabel->setStyleSheet("color: white; background-color: black; padding: 2px;");
+    gpsLabel->setStyleSheet("color: black; padding: 2px;");
 
     // Capture button (below thermal, left side)
     QPushButton *saveButton = new QPushButton("Capture Image", myWidget);
-    saveButton->setGeometry(270, 488, 120, 28);
+    saveButton->setGeometry(595, 488, 120, 28);
 
     // Set window size to fit everything
     myWidget->setGeometry(400, 300, 1310, 535);
 
-    // --- RGB Thread ---
+    // RGB Thread 
     RGBThread *rgbThread = new RGBThread();
     QObject::connect(rgbThread, SIGNAL(updateRGBImage(QImage)),
                      &rgbLabel, SLOT(setImage(QImage)));
     rgbThread->start();
 
-    // --- GPS Thread ---
+    // GPS Thread 
     GPSThread *gpsThread = new GPSThread();
     QObject::connect(gpsThread, &GPSThread::updateGPS,
         [gpsLabel](QString lat, QString lon, QString source) {
@@ -136,7 +136,7 @@ int main( int argc, char **argv )
         });
     gpsThread->start();
 
-    // --- Lepton Thermal Thread ---
+    // Lepton Thermal Thread
     LeptonThread *thread = new LeptonThread();
     thread->setLogLevel(loglevel);
     thread->useColormap(typeColormap);
@@ -149,7 +149,7 @@ int main( int argc, char **argv )
                      &myLabel, SLOT(setImage(QImage)));
     thread->start();
 
-    // --- Capture button: save both frames with shared timestamp and log GPS ---
+    // Capture button: save both frames with shared timestamp and log GPS at capture time
     QObject::connect(saveButton, &QPushButton::clicked,
         [thread, rgbThread, gpsThread]() {
             QString timestamp = QDateTime::currentDateTime()
