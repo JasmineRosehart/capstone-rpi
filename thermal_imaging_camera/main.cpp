@@ -132,7 +132,7 @@ int main( int argc, char **argv )
     GPSThread *gpsThread = new GPSThread();
     QObject::connect(gpsThread, &GPSThread::updateGPS,
         [gpsLabel](QString lat, QString lon, QString source) {
-            gpsLabel->setText("GPS [" + source + "]  Lat: " + lat + "  Lon: " + lon);
+            gpsLabel->setText("GPS  Lat: " + lat + "  Lon: " + lon);
         });
     gpsThread->start();
 
