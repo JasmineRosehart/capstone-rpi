@@ -16,6 +16,9 @@
 
 #include <signal.h>
 
+#include "GPSThread.h"
+#include <QDateTime>
+
 
 void printUsage(char *cmd) {
         char *cmdname = basename(cmd);
@@ -131,6 +134,11 @@ int main( int argc, char **argv )
 	MyLabel rgbLabel(myWidget);
 	rgbLabel.setGeometry(660, 10, 640, 480);  // place it to the right of thermal
 
+	// Add a label for GPS data
+	QLabel *gpsLabel = new QLabel("GPS: fetching...", myWidget);
+	gpsLabel->setGeometry(10, 500, 1290, 25);
+	gpsLabel->setStyleSheet("color: white; background-color: black; padding: 2px;");
+
 	// Resize window to fit both
 	myWidget->setGeometry(400, 300, 1310, 530);
 
@@ -138,6 +146,18 @@ int main( int argc, char **argv )
 	RGBThread *rgbThread = new RGBThread();
 	QObject::connect(rgbThread, SIGNAL(updateRGBImage(QImage)), &rgbLabel, SLOT(setImage(QImage)));
 	rgbThread->start();
+
+	// Create and connect GPS thread
+	GPSThread *gpsThread = new GPSThread();
+	QObject::connect(saveButton, &QPushButton::clicked, [thread, rgbThread, gpsThread]() {
+		QString timestamp = QDateTime::currentDateTime().toString("yyyyMMdd_hhmmss");
+		
+		std::cout << "[GPS at capture] Lat: " << gpsThread->getLastLat().toStdString()
+				<< "  Lon: " << gpsThread->getLastLon().toStdString() << std::endl;
+
+		thread->saveCurrentFrame(timestamp);
+		rgbThread->saveCurrentFrame(timestamp);
+	});
 
 
 	//create a FFC button
