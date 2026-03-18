@@ -3,6 +3,7 @@
 #include <cstring>
 #include <QDir>
 #include <QDateTime>
+#include <QPainter>
 
 RGBThread::RGBThread() : QThread(), running(false), width(640), height(480) {}
 RGBThread::~RGBThread() {}
@@ -70,17 +71,41 @@ void RGBThread::run() {
     pclose(pipe);
 }
 
-void RGBThread::saveCurrentFrame(QString timestamp) {
+// void RGBThread::saveCurrentFrame(QString timestamp) {
+//     frameMutex.lock();
+//     if (!lastFrame.isNull()) {
+//         QDir().mkdir("rgb_images");
+
+//         // Use the 'timestamp' passed from the lambda instead of calling QDateTime again
+//         QString qPath = QString("rgb_images/rgb_%1.jpg").arg(timestamp);
+        
+//         std::string localFile = qPath.toStdString();
+
+//         if (lastFrame.save(qPath, "JPG")) {
+//             std::cout << "[RGB] Saved locally: " << localFile << std::endl;
+//             uploadToS3(localFile);
+//         }
+//     }
+//     frameMutex.unlock();
+// }
+
+void RGBThread::saveCurrentFrame(QString timestamp, QString lat, QString lon) {
     frameMutex.lock();
     if (!lastFrame.isNull()) {
         QDir().mkdir("rgb_images");
-
-        // Use the 'timestamp' passed from the lambda instead of calling QDateTime again
         QString qPath = QString("rgb_images/rgb_%1.jpg").arg(timestamp);
-        
-        std::string localFile = qPath.toStdString();
 
-        if (lastFrame.save(qPath, "JPG")) {
+        // Draw GPS onto image
+        QImage imgWithGPS = lastFrame.copy();
+        QPainter painter(&imgWithGPS);
+        painter.setFont(QFont("Arial", 14));
+        painter.setPen(Qt::white);
+        QString gpsText = "Lat: " + lat + "  Lon: " + lon;
+        painter.drawText(5, imgWithGPS.height() - 5, gpsText);
+        painter.end();
+
+        std::string localFile = qPath.toStdString();
+        if (imgWithGPS.save(qPath, "JPG")) {
             std::cout << "[RGB] Saved locally: " << localFile << std::endl;
             uploadToS3(localFile);
         }

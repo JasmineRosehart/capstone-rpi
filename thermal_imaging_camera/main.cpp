@@ -150,20 +150,19 @@ int main( int argc, char **argv )
     thread->start();
 
     // Capture button: save both frames with shared timestamp and log GPS at capture time
-    QObject::connect(saveButton, &QPushButton::clicked,
-        [thread, rgbThread, gpsThread]() {
-            QString timestamp = QDateTime::currentDateTime()
-                                    .toString("yyyyMMdd_hhmmss");
+	QObject::connect(saveButton, &QPushButton::clicked,
+		[thread, rgbThread, gpsThread]() {
+			QString timestamp = QDateTime::currentDateTime()
+									.toString("yyyyMMdd_hhmmss");
+			QString lat = gpsThread->getLastLat();
+			QString lon = gpsThread->getLastLon();
 
-            std::cout << "[GPS at capture] Lat: "
-                      << gpsThread->getLastLat().toStdString()
-                      << "  Lon: "
-                      << gpsThread->getLastLon().toStdString()
-                      << std::endl;
+			std::cout << "[GPS at capture] Lat: " << lat.toStdString()
+					<< "  Lon: " << lon.toStdString() << std::endl;
 
-            thread->saveCurrentFrame(timestamp);
-            rgbThread->saveCurrentFrame(timestamp);
-        });
+			thread->saveCurrentFrame(timestamp, lat, lon);
+			rgbThread->saveCurrentFrame(timestamp, lat, lon);
+		});
 
     myWidget->show();
     return a.exec();

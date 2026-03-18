@@ -6,6 +6,9 @@
 #include "SPI.h"
 #include "Lepton_I2C.h"
 
+#include <QPainter>
+#include <QDir>
+
 #define PACKET_SIZE 164
 #define PACKET_SIZE_UINT16 (PACKET_SIZE/2)
 #define PACKETS_PER_FRAME 60
@@ -278,17 +281,41 @@ void LeptonThread::run()
 	SpiClosePort(1);
 }
 
-void LeptonThread::saveCurrentFrame(QString timestamp) {
+// void LeptonThread::saveCurrentFrame(QString timestamp) {
+//     frameMutex.lock();
+//     if (!lastFrame.isNull()) {
+//         QDir().mkdir("ir_images");
+
+//         // Use the same shared timestamp
+//         QString qPath = QString("ir_images/ir_%1.jpg").arg(timestamp);
+        
+//         std::string localFile = qPath.toStdString();
+
+//         if (lastFrame.save(qPath, "JPG")) {
+//             std::cout << "[IR] Saved locally: " << localFile << std::endl;
+//             uploadToS3(localFile);
+//         }
+//     }
+//     frameMutex.unlock();
+// }
+
+void LeptonThread::saveCurrentFrame(QString timestamp, QString lat, QString lon) {
     frameMutex.lock();
     if (!lastFrame.isNull()) {
         QDir().mkdir("ir_images");
-
-        // Use the same shared timestamp
         QString qPath = QString("ir_images/ir_%1.jpg").arg(timestamp);
-        
-        std::string localFile = qPath.toStdString();
 
-        if (lastFrame.save(qPath, "JPG")) {
+        // Draw GPS onto image
+        QImage imgWithGPS = lastFrame.copy();
+        QPainter painter(&imgWithGPS);
+        painter.setFont(QFont("Arial", 8));
+        painter.setPen(Qt::white);
+        QString gpsText = "Lat: " + lat + "  Lon: " + lon;
+        painter.drawText(5, imgWithGPS.height() - 5, gpsText);
+        painter.end();
+
+        std::string localFile = qPath.toStdString();
+        if (imgWithGPS.save(qPath, "JPG")) {
             std::cout << "[IR] Saved locally: " << localFile << std::endl;
             uploadToS3(localFile);
         }

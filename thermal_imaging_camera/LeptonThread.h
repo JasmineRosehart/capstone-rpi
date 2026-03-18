@@ -9,6 +9,10 @@
 #include <QPixmap>
 #include <QImage>
 
+#include <QPainter>
+#include <QFont>
+#include <QDir>
+
 
 #define PACKET_SIZE 164
 #define PACKET_SIZE_UINT16 (PACKET_SIZE/2)
@@ -34,7 +38,7 @@ public:
 
 public slots:
   void performFFC();
-  void saveCurrentFrame(QString timestamp);
+  void saveCurrentFrame(QString timestamp, QString lat, QString lon);
 
 signals:
   void updateText(QString);
