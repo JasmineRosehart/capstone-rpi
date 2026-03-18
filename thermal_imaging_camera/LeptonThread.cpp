@@ -299,24 +299,25 @@ void LeptonThread::run()
 //     frameMutex.unlock();
 // }
 
+
 void LeptonThread::saveCurrentFrame(QString timestamp, QString lat, QString lon) {
     frameMutex.lock();
     if (!lastFrame.isNull()) {
         QDir().mkdir("ir_images");
         QString qPath = QString("ir_images/ir_%1.jpg").arg(timestamp);
-
-        // Draw GPS onto image
-        QImage imgWithGPS = lastFrame.copy();
-        QPainter painter(&imgWithGPS);
-        painter.setFont(QFont("Arial", 8));
-        painter.setPen(Qt::white);
-        QString gpsText = "Lat: " + lat + "  Lon: " + lon;
-        painter.drawText(5, imgWithGPS.height() - 5, gpsText);
-        painter.end();
-
         std::string localFile = qPath.toStdString();
-        if (imgWithGPS.save(qPath, "JPG")) {
+
+        if (lastFrame.save(qPath, "JPG")) {
             std::cout << "[IR] Saved locally: " << localFile << std::endl;
+
+            // Write GPS to EXIF metadata
+            std::string exifCmd = "exiftool -overwrite_original "
+                                  "-GPSLatitude=" + lat.toStdString() +
+                                  " -GPSLongitude=" + lon.toStdString() +
+                                  " -GPSLatitudeRef=N -GPSLongitudeRef=W " +
+                                  localFile + " 2>/dev/null";
+            system(exifCmd.c_str());
+
             uploadToS3(localFile);
         }
     }

@@ -94,24 +94,25 @@ void RGBThread::saveCurrentFrame(QString timestamp, QString lat, QString lon) {
     if (!lastFrame.isNull()) {
         QDir().mkdir("rgb_images");
         QString qPath = QString("rgb_images/rgb_%1.jpg").arg(timestamp);
-
-        // Draw GPS onto image
-        QImage imgWithGPS = lastFrame.copy();
-        QPainter painter(&imgWithGPS);
-        painter.setFont(QFont("Arial", 14));
-        painter.setPen(Qt::white);
-        QString gpsText = "Lat: " + lat + "  Lon: " + lon;
-        painter.drawText(5, imgWithGPS.height() - 5, gpsText);
-        painter.end();
-
         std::string localFile = qPath.toStdString();
-        if (imgWithGPS.save(qPath, "JPG")) {
+
+        if (lastFrame.save(qPath, "JPG")) {
             std::cout << "[RGB] Saved locally: " << localFile << std::endl;
+
+            // Write GPS to EXIF metadata
+            std::string exifCmd = "exiftool -overwrite_original "
+                                  "-GPSLatitude=" + lat.toStdString() +
+                                  " -GPSLongitude=" + lon.toStdString() +
+                                  " -GPSLatitudeRef=N -GPSLongitudeRef=W " +
+                                  localFile + " 2>/dev/null";
+            system(exifCmd.c_str());
+
             uploadToS3(localFile);
         }
     }
     frameMutex.unlock();
 }
+
 
 bool RGBThread::uploadToS3(const std::string& filename) {
     // Construct the command
