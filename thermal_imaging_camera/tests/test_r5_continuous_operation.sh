@@ -14,7 +14,7 @@ RESULTS_DIR="tests/results"
 mkdir -p "$RESULTS_DIR"
 OUTFILE="$RESULTS_DIR/r5_continuous_operation.txt"
 
-DURATION_MIN=${1:-720}
+DURATION_MIN=${1:-60} # Default to 60 minutes for testing; set to 720 for full 12h test
 INTERVAL_SEC=60
 ITERATIONS=$(( DURATION_MIN * 60 / INTERVAL_SEC ))
 APP_NAME="raspberrypi_video"
@@ -33,7 +33,7 @@ echo "========================================"     | tee -a "$OUTFILE"
 echo ""                                             | tee -a "$OUTFILE"
 
 # Warn if app isn't running yet
-if ! pgrep -x "$APP_NAME" > /dev/null; then
+if ! pgrep -f "$APP_NAME" > /dev/null; then
     echo "WARNING: $APP_NAME is not running."        | tee -a "$OUTFILE"
     echo "Start it with: sudo nice -n -20 ./raspberrypi_video -tl 3" | tee -a "$OUTFILE"
     echo "Then re-run this script."                  | tee -a "$OUTFILE"
@@ -52,7 +52,7 @@ printf "%-25s %-10s %-15s %-10s %-12s %-10s\n" \
 for i in $(seq 1 $ITERATIONS); do
     ELAPSED_MIN=$(( i * INTERVAL_SEC / 60 ))
     TIMESTAMP=$(date +"%Y-%m-%d %H:%M:%S")
-    PID=$(pgrep -x "$APP_NAME" 2>/dev/null)
+    PID=$(pgrep -f "$APP_NAME" 2>/dev/null)
 
     if [ -n "$PID" ]; then
         STATUS="RUNNING"
