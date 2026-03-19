@@ -91,13 +91,18 @@ void GPSThread::run() {
                       << ", " << lon.toStdString() << std::endl;
 
             emit updateGPS(lat, lon, "IP");
+
+            // Refresh every 30 seconds — IP location doesn't change often
+            for (int i = 0; i < 30 && running; i++) {
+                sleep(1);
+            }
         } else {
             emit updateGPS("n/a", "n/a", "NO SIGNAL");
-        }
 
-        // Refresh every 30 seconds — IP location doesn't change often
-        for (int i = 0; i < 30 && running; i++) {
-            sleep(1);
+            // Wait 10 seconds before retrying — don't spam the API on failure
+            for (int i = 0; i < 10 && running; i++) {
+                sleep(1);
+            }
         }
     }
 
