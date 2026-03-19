@@ -70,7 +70,7 @@ while [ "$CAPTURED" -lt "$REQUIRED_CAPTURES" ]; do
     ELAPSED=0
     NEW_IR=""
     while [ -z "$NEW_IR" ] && [ "$ELAPSED" -lt "$TIMEOUT" ]; do
-        sleep 2
+        sleep 60
         ELAPSED=$((ELAPSED + 2))
         CURRENT_IR=$(ls ir_images/ir_*.jpg 2>/dev/null | sort)
         # Find files that weren't there before
@@ -116,7 +116,7 @@ while [ "$CAPTURED" -lt "$REQUIRED_CAPTURES" ]; do
     # ---- Check 2: RGB image exists with matching timestamp ----
     TOTAL=$((TOTAL + 1))
     # Give RGB a moment to save (it runs concurrently)
-    sleep 3
+    sleep 60
     if [ -f "$RGB_FILE" ]; then
         SIZE=$(du -k "$RGB_FILE" | cut -f1)
         echo "  [2] RGB image:  FOUND (${SIZE}KB) — PASS"  | tee -a "$OUTFILE"
@@ -130,7 +130,7 @@ while [ "$CAPTURED" -lt "$REQUIRED_CAPTURES" ]; do
     # ---- Check 3: GPS EXIF in IR image ----
     TOTAL=$((TOTAL + 1))
     # Give exiftool a moment after save
-    sleep 2
+    sleep 60
     GPS_IR=$(exiftool "$IR_FILE" 2>/dev/null | grep -i "GPS Position")
     if [ -n "$GPS_IR" ]; then
         echo "  [3] IR GPS EXIF: $GPS_IR — PASS"            | tee -a "$OUTFILE"
@@ -157,7 +157,7 @@ while [ "$CAPTURED" -lt "$REQUIRED_CAPTURES" ]; do
 
     # ---- Check 5: File appears in S3 ----
     TOTAL=$((TOTAL + 1))
-    sleep 5  # Give S3 upload time to complete
+    sleep 60  # Give S3 upload time to complete
     S3_IR=$(aws s3 ls \
         "s3://fire-ml-bucket/inputs/ir-images/ir_images/ir_${TS}.jpg" \
         --region us-east-2 2>/dev/null)
