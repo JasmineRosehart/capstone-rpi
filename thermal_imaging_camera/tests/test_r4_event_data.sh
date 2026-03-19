@@ -35,7 +35,7 @@ echo "========================================"    | tee -a "$OUTFILE"
 echo ""                                            | tee -a "$OUTFILE"
 
 # ---- Check app is running ----
-if ! pgrep -x "raspberrypi_video" > /dev/null; then
+if ! pgrep -f "raspberrypi_video" > /dev/null; then
     echo "ERROR: raspberrypi_video is not running." | tee -a "$OUTFILE"
     echo "Start it first with:"                     | tee -a "$OUTFILE"
     echo "  sudo nice -n -20 ./raspberrypi_video -tl 3" | tee -a "$OUTFILE"
