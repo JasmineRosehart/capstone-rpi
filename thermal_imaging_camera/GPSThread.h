@@ -27,6 +27,7 @@ private:
     QString lastLon;
     QMutex gpsMutex;
 
+    bool fetchHardwareGPS(QString& lat, QString& lon);
     bool fetchIPLocation(QString& lat, QString& lon);
 };
 
