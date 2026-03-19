@@ -2,10 +2,20 @@
 # =============================================================
 # TEST: R4 — Event Data Recording
 # Requirement: Each capture records time, GPS location, and image
-# Method: Verify saved images have matching timestamps across IR
-#         and RGB, and that GPS EXIF fields are present
+# Method: Waits for the app to be running, then monitors the
+#         ir_images/ and rgb_images/ folders for new captures.
+#         You trigger captures manually by clicking "Capture Image"
+#         in the app UI. This script watches for them and verifies
+#         timestamp sync, GPS EXIF, and S3 upload for each one.
+#
+# Usage:
+#   1. Start the app in another terminal:
+#        sudo nice -n -20 ./raspberrypi_video -tl 3
+#   2. Run this script:
+#        bash tests/test_r4_event_data.sh
+#   3. Click "Capture Image" in the app 3 times when prompted
+#
 # Output: tests/results/r4_event_data.txt
-# Prereq: At least one capture must exist in ir_images/ and rgb_images/
 # =============================================================
 
 RESULTS_DIR="tests/results"
@@ -14,111 +24,190 @@ OUTFILE="$RESULTS_DIR/r4_event_data.txt"
 PASS=0
 FAIL=0
 TOTAL=0
+REQUIRED_CAPTURES=3
 
-echo "========================================"  | tee "$OUTFILE"
-echo "TEST R4: Event Data Recording"             | tee -a "$OUTFILE"
-echo "Requirement: Each capture records time,"   | tee -a "$OUTFILE"
-echo "             GPS location, and image data" | tee -a "$OUTFILE"
-echo "Date: $(date)"                             | tee -a "$OUTFILE"
-echo "========================================"  | tee -a "$OUTFILE"
-echo ""                                          | tee -a "$OUTFILE"
+echo "========================================"    | tee "$OUTFILE"
+echo "TEST R4: Event Data Recording"               | tee -a "$OUTFILE"
+echo "Requirement: Each capture records time,"     | tee -a "$OUTFILE"
+echo "             GPS location, and image data"   | tee -a "$OUTFILE"
+echo "Date: $(date)"                               | tee -a "$OUTFILE"
+echo "========================================"    | tee -a "$OUTFILE"
+echo ""                                            | tee -a "$OUTFILE"
 
-# ---- 1. Check timestamp synchronization ----
-echo "--- 1. Timestamp Synchronization ---"      | tee -a "$OUTFILE"
-echo "Verifying IR and RGB images share timestamps..." | tee -a "$OUTFILE"
-echo "" | tee -a "$OUTFILE"
+# ---- Check app is running ----
+if ! pgrep -x "raspberrypi_video" > /dev/null; then
+    echo "ERROR: raspberrypi_video is not running." | tee -a "$OUTFILE"
+    echo "Start it first with:"                     | tee -a "$OUTFILE"
+    echo "  sudo nice -n -20 ./raspberrypi_video -tl 3" | tee -a "$OUTFILE"
+    exit 1
+fi
 
-IR_TIMESTAMPS=$(ls ir_images/ir_*.jpg 2>/dev/null \
-    | sed 's|ir_images/ir_||' | sed 's|\.jpg||')
+echo "App detected. Ready to monitor captures."   | tee -a "$OUTFILE"
+echo ""                                            | tee -a "$OUTFILE"
 
-if [ -z "$IR_TIMESTAMPS" ]; then
-    echo "  No IR images found. Run the app and capture at least one image first." \
+# ---- Record baseline (existing files before test) ----
+BEFORE_IR=$(ls ir_images/ir_*.jpg 2>/dev/null | sort)
+BEFORE_RGB=$(ls rgb_images/rgb_*.jpg 2>/dev/null | sort)
+
+# ---- Prompt user to trigger captures ----
+echo "============================================"
+echo "ACTION REQUIRED:"
+echo "  Click 'Capture Image' in the app UI"
+echo "  ${REQUIRED_CAPTURES} times."
+echo "  This script will detect each capture automatically."
+echo "============================================"
+echo ""
+
+CAPTURED=0
+SEEN_TIMESTAMPS=""
+
+while [ "$CAPTURED" -lt "$REQUIRED_CAPTURES" ]; do
+    echo "Waiting for capture $((CAPTURED + 1)) of ${REQUIRED_CAPTURES}..." \
         | tee -a "$OUTFILE"
-else
-    for ts in $IR_TIMESTAMPS; do
-        TOTAL=$((TOTAL + 1))
-        IR_FILE="ir_images/ir_${ts}.jpg"
-        RGB_FILE="rgb_images/rgb_${ts}.jpg"
 
-        if [ -f "$RGB_FILE" ]; then
-            echo "  Timestamp $ts: IR ✓  RGB ✓  — PASS" | tee -a "$OUTFILE"
+    # Poll for new IR images
+    TIMEOUT=60
+    ELAPSED=0
+    NEW_IR=""
+    while [ -z "$NEW_IR" ] && [ "$ELAPSED" -lt "$TIMEOUT" ]; do
+        sleep 2
+        ELAPSED=$((ELAPSED + 2))
+        CURRENT_IR=$(ls ir_images/ir_*.jpg 2>/dev/null | sort)
+        # Find files that weren't there before
+        for f in $CURRENT_IR; do
+            if ! echo "$BEFORE_IR" | grep -qF "$f" && \
+               ! echo "$SEEN_TIMESTAMPS" | grep -qF "$(basename $f)"; then
+                NEW_IR="$f"
+                break
+            fi
+        done
+    done
+
+    if [ -z "$NEW_IR" ]; then
+        echo "  Timeout waiting for capture — did you click the button?" \
+            | tee -a "$OUTFILE"
+        break
+    fi
+
+    # Extract timestamp from filename
+    TS=$(basename "$NEW_IR" | sed 's/ir_//' | sed 's/\.jpg//')
+    SEEN_TIMESTAMPS="$SEEN_TIMESTAMPS $TS"
+    CAPTURED=$((CAPTURED + 1))
+    BEFORE_IR="$BEFORE_IR $NEW_IR"
+
+    echo ""                                        | tee -a "$OUTFILE"
+    echo "--- Capture $CAPTURED detected: $TS ---" | tee -a "$OUTFILE"
+    echo ""                                        | tee -a "$OUTFILE"
+
+    IR_FILE="ir_images/ir_${TS}.jpg"
+    RGB_FILE="rgb_images/rgb_${TS}.jpg"
+
+    # ---- Check 1: IR image exists ----
+    TOTAL=$((TOTAL + 1))
+    if [ -f "$IR_FILE" ]; then
+        SIZE=$(du -k "$IR_FILE" | cut -f1)
+        echo "  [1] IR image:   FOUND (${SIZE}KB) — PASS"  | tee -a "$OUTFILE"
+        PASS=$((PASS + 1))
+    else
+        echo "  [1] IR image:   NOT FOUND — FAIL"           | tee -a "$OUTFILE"
+        FAIL=$((FAIL + 1))
+    fi
+
+    # ---- Check 2: RGB image exists with matching timestamp ----
+    TOTAL=$((TOTAL + 1))
+    # Give RGB a moment to save (it runs concurrently)
+    sleep 3
+    if [ -f "$RGB_FILE" ]; then
+        SIZE=$(du -k "$RGB_FILE" | cut -f1)
+        echo "  [2] RGB image:  FOUND (${SIZE}KB) — PASS"  | tee -a "$OUTFILE"
+        PASS=$((PASS + 1))
+    else
+        echo "  [2] RGB image:  NOT FOUND (timestamp mismatch?) — FAIL" \
+            | tee -a "$OUTFILE"
+        FAIL=$((FAIL + 1))
+    fi
+
+    # ---- Check 3: GPS EXIF in IR image ----
+    TOTAL=$((TOTAL + 1))
+    # Give exiftool a moment after save
+    sleep 2
+    GPS_IR=$(exiftool "$IR_FILE" 2>/dev/null | grep -i "GPS Position")
+    if [ -n "$GPS_IR" ]; then
+        echo "  [3] IR GPS EXIF: $GPS_IR — PASS"            | tee -a "$OUTFILE"
+        PASS=$((PASS + 1))
+    else
+        echo "  [3] IR GPS EXIF: NOT FOUND — FAIL"          | tee -a "$OUTFILE"
+        FAIL=$((FAIL + 1))
+    fi
+
+    # ---- Check 4: GPS EXIF in RGB image ----
+    TOTAL=$((TOTAL + 1))
+    if [ -f "$RGB_FILE" ]; then
+        GPS_RGB=$(exiftool "$RGB_FILE" 2>/dev/null | grep -i "GPS Position")
+        if [ -n "$GPS_RGB" ]; then
+            echo "  [4] RGB GPS EXIF: $GPS_RGB — PASS"      | tee -a "$OUTFILE"
             PASS=$((PASS + 1))
         else
-            echo "  Timestamp $ts: IR ✓  RGB ✗  — FAIL (no matching RGB)" \
+            echo "  [4] RGB GPS EXIF: NOT FOUND — FAIL"     | tee -a "$OUTFILE"
+            FAIL=$((FAIL + 1))
+        fi
+    else
+        echo "  [4] RGB GPS EXIF: SKIPPED (no RGB file)"    | tee -a "$OUTFILE"
+    fi
+
+    # ---- Check 5: File appears in S3 ----
+    TOTAL=$((TOTAL + 1))
+    sleep 5  # Give S3 upload time to complete
+    S3_IR=$(aws s3 ls \
+        "s3://fire-ml-bucket/inputs/ir-images/ir_images/ir_${TS}.jpg" \
+        --region us-east-2 2>/dev/null)
+    if [ -n "$S3_IR" ]; then
+        echo "  [5] S3 upload:  CONFIRMED — PASS"            | tee -a "$OUTFILE"
+        PASS=$((PASS + 1))
+    else
+        # Try alternate path
+        S3_IR2=$(aws s3 ls \
+            "s3://fire-ml-bucket/inputs/ir-images/" \
+            --region us-east-2 2>/dev/null | grep "ir_${TS}")
+        if [ -n "$S3_IR2" ]; then
+            echo "  [5] S3 upload:  CONFIRMED — PASS"        | tee -a "$OUTFILE"
+            PASS=$((PASS + 1))
+        else
+            echo "  [5] S3 upload:  NOT YET VISIBLE (may still be uploading) — CHECK MANUALLY" \
                 | tee -a "$OUTFILE"
             FAIL=$((FAIL + 1))
         fi
-    done
-fi
+    fi
 
-echo "" | tee -a "$OUTFILE"
+    echo ""                                        | tee -a "$OUTFILE"
+    echo "  Capture $CAPTURED complete."           | tee -a "$OUTFILE"
+    echo ""                                        | tee -a "$OUTFILE"
 
-# ---- 2. Check GPS EXIF in IR images ----
-echo "--- 2. GPS EXIF in IR Images ---"          | tee -a "$OUTFILE"
-echo "" | tee -a "$OUTFILE"
-
-for img in ir_images/ir_*.jpg; do
-    [ -f "$img" ] || { echo "  No IR images found." | tee -a "$OUTFILE"; break; }
-    TOTAL=$((TOTAL + 1))
-    GPS=$(exiftool "$img" 2>/dev/null | grep -i "GPS Position")
-    if [ -n "$GPS" ]; then
-        echo "  $(basename $img): $GPS — PASS" | tee -a "$OUTFILE"
-        PASS=$((PASS + 1))
-    else
-        echo "  $(basename $img): No GPS data — FAIL" | tee -a "$OUTFILE"
-        FAIL=$((FAIL + 1))
+    if [ "$CAPTURED" -lt "$REQUIRED_CAPTURES" ]; then
+        echo "============================================"
+        echo "  Click 'Capture Image' again ($((REQUIRED_CAPTURES - CAPTURED)) more needed)"
+        echo "============================================"
     fi
 done
 
-echo "" | tee -a "$OUTFILE"
+# ---- Final S3 count ----
+echo "--- S3 Bucket Contents ---"                  | tee -a "$OUTFILE"
+echo "IR images in S3:"                            | tee -a "$OUTFILE"
+aws s3 ls s3://fire-ml-bucket/inputs/ir-images/ \
+    --region us-east-2 2>/dev/null | tail -5       | tee -a "$OUTFILE"
+echo "RGB images in S3:"                           | tee -a "$OUTFILE"
+aws s3 ls s3://fire-ml-bucket/inputs/rgb-images/ \
+    --region us-east-2 2>/dev/null | tail -5       | tee -a "$OUTFILE"
 
-# ---- 3. Check GPS EXIF in RGB images ----
-echo "--- 3. GPS EXIF in RGB Images ---"         | tee -a "$OUTFILE"
-echo "" | tee -a "$OUTFILE"
-
-for img in rgb_images/rgb_*.jpg; do
-    [ -f "$img" ] || { echo "  No RGB images found." | tee -a "$OUTFILE"; break; }
-    TOTAL=$((TOTAL + 1))
-    GPS=$(exiftool "$img" 2>/dev/null | grep -i "GPS Position")
-    if [ -n "$GPS" ]; then
-        echo "  $(basename $img): $GPS — PASS" | tee -a "$OUTFILE"
-        PASS=$((PASS + 1))
-    else
-        echo "  $(basename $img): No GPS data — FAIL" | tee -a "$OUTFILE"
-        FAIL=$((FAIL + 1))
-    fi
-done
-
-echo "" | tee -a "$OUTFILE"
-
-# ---- 4. Check S3 presence ----
-echo "--- 4. S3 Cloud Storage Verification ---"  | tee -a "$OUTFILE"
-echo "" | tee -a "$OUTFILE"
-
-IR_S3=$(aws s3 ls s3://fire-ml-bucket/inputs/ir-images/ \
-    --region us-east-2 2>/dev/null | wc -l)
-RGB_S3=$(aws s3 ls s3://fire-ml-bucket/inputs/rgb-images/ \
-    --region us-east-2 2>/dev/null | wc -l)
-
-echo "  IR images in S3:  $IR_S3" | tee -a "$OUTFILE"
-echo "  RGB images in S3: $RGB_S3" | tee -a "$OUTFILE"
-
-if [ "$IR_S3" -gt 0 ] && [ "$RGB_S3" -gt 0 ]; then
-    echo "  S3 upload verified — PASS" | tee -a "$OUTFILE"
-    PASS=$((PASS + 1))
-else
-    echo "  S3 missing images — FAIL" | tee -a "$OUTFILE"
-    FAIL=$((FAIL + 1))
-fi
-TOTAL=$((TOTAL + 1))
-
-echo ""                                          | tee -a "$OUTFILE"
-echo "========================================"  | tee -a "$OUTFILE"
-echo "SUMMARY"                                  | tee -a "$OUTFILE"
-echo "  Checks: $TOTAL"                         | tee -a "$OUTFILE"
-echo "  PASS:   $PASS"                          | tee -a "$OUTFILE"
-echo "  FAIL:   $FAIL"                          | tee -a "$OUTFILE"
-[ "$FAIL" -eq 0 ] && echo "  OVERALL: PASS" | tee -a "$OUTFILE" \
-                  || echo "  OVERALL: FAIL" | tee -a "$OUTFILE"
-echo "========================================"  | tee -a "$OUTFILE"
+echo ""                                            | tee -a "$OUTFILE"
+echo "========================================"    | tee -a "$OUTFILE"
+echo "SUMMARY"                                    | tee -a "$OUTFILE"
+echo "  Captures tested: $CAPTURED"               | tee -a "$OUTFILE"
+echo "  Total checks:    $TOTAL"                  | tee -a "$OUTFILE"
+echo "  PASS:            $PASS"                   | tee -a "$OUTFILE"
+echo "  FAIL:            $FAIL"                   | tee -a "$OUTFILE"
+[ "$FAIL" -eq 0 ] && [ "$CAPTURED" -ge "$REQUIRED_CAPTURES" ] \
+    && echo "  OVERALL: PASS" | tee -a "$OUTFILE" \
+    || echo "  OVERALL: FAIL" | tee -a "$OUTFILE"
+echo "========================================"    | tee -a "$OUTFILE"
 echo "Saved: $OUTFILE"
