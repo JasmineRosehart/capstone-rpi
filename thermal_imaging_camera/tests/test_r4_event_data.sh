@@ -13,7 +13,7 @@
 #        sudo nice -n -20 ./raspberrypi_video -tl 3
 #   2. Run this script:
 #        bash tests/test_r4_event_data.sh
-#   3. Click "Capture Image" in the app 3 times when prompted
+#   3. Click "Capture Image" in the app X times when prompted
 #
 # Output: tests/results/r4_event_data.txt
 # =============================================================
@@ -24,7 +24,7 @@ OUTFILE="$RESULTS_DIR/r4_event_data.txt"
 PASS=0
 FAIL=0
 TOTAL=0
-REQUIRED_CAPTURES=3
+REQUIRED_CAPTURES=5 # Number of captures to test (you can adjust this)
 
 echo "========================================"    | tee "$OUTFILE"
 echo "TEST R4: Event Data Recording"               | tee -a "$OUTFILE"
