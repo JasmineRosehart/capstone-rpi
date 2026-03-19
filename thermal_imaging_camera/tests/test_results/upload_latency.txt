@@ -1,0 +1,34 @@
+======================================
+TEST: Upload Latency (R3)
+Requirement: Upload within 30 seconds
+Date: Wed 18 Mar 20:34:56 EDT 2026
+======================================
+
+Running 5 capture-and-upload trials...
+
+Trial 1: Uploading test_results/test_upload_20260318_203456.jpg...
+  Time: 5.38s (5388ms)
+  Result: PASS (under 30s)
+
+Trial 2: Uploading test_results/test_upload_20260318_203504.jpg...
+  Time: 5.40s (5403ms)
+  Result: PASS (under 30s)
+
+Trial 3: Uploading test_results/test_upload_20260318_203511.jpg...
+  Time: 5.40s (5407ms)
+  Result: PASS (under 30s)
+
+Trial 4: Uploading test_results/test_upload_20260318_203518.jpg...
+  Time: 5.34s (5347ms)
+  Result: PASS (under 30s)
+
+Trial 5: Uploading test_results/test_upload_20260318_203526.jpg...
+  Time: 6.55s (6558ms)
+  Result: PASS (under 30s)
+
+======================================
+SUMMARY:
+  PASS: 5 / 5
+  FAIL: 0 / 5
+  OVERALL: PASS
+======================================
