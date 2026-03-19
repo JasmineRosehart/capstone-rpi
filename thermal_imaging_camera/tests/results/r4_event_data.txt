@@ -1,0 +1,39 @@
+========================================
+TEST R4: Event Data Recording
+Requirement: Each capture records time,
+             GPS location, and image data
+Date: Thu 19 Mar 18:24:48 EDT 2026
+========================================
+
+App detected. Ready to monitor captures.
+
+Waiting for capture 1 of 5...
+
+--- Capture 1 detected: 20260319_182452 ---
+
+  [1] IR image:   FOUND (8KB) — PASS
+  [2] RGB image:  FOUND (36KB) — PASS
+  [3] IR GPS EXIF: GPS Position                    : 43 deg 41' 12.48" N, 79 deg 24' 7.20" W — PASS
+  [4] RGB GPS EXIF: GPS Position                    : 43 deg 41' 12.48" N, 79 deg 24' 7.20" W — PASS
+  [5] S3 upload:  CONFIRMED — PASS
+
+  Capture 1 complete.
+
+Waiting for capture 2 of 5...
+
+--- Capture 2 detected: 20260319_183023 ---
+
+  [1] IR image:   FOUND (4KB) — PASS
+  [2] RGB image:  FOUND (36KB) — PASS
+  [3] IR GPS EXIF: GPS Position                    : 43 deg 41' 12.48" N, 79 deg 24' 7.20" W — PASS
+  [4] RGB GPS EXIF: GPS Position                    : 43 deg 41' 12.48" N, 79 deg 24' 7.20" W — PASS
+  [5] S3 upload:  CONFIRMED — PASS
+
+  Capture 2 complete.
+
+Waiting for capture 3 of 5...
+
+--- Capture 3 detected: 20260319_183427 ---
+
+  [1] IR image:   FOUND (4KB) — PASS
+  [2] RGB image:  NOT FOUND (timestamp mismatch?) — FAIL

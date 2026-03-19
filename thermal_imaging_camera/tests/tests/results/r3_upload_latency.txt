@@ -1,0 +1,133 @@
+========================================
+TEST R3: Upload & Pipeline Latency
+Requirement: Pipeline completes <= 60s
+Date: Thu 19 Mar 17:43:24 EDT 2026
+========================================
+
+  Warning: No IR image found, using dummy file
+Trial 1 of 20: test_upload_20260319_174324.jpg
+Completed 50.0 KiB/50.0 KiB (70.0 KiB/s) with 1 file(s) remainingupload: tests/results/test_upload_20260319_174324.jpg to s3://fire-ml-bucket/inputs/test-latency/test_upload_20260319_174324.jpg
+  Upload time: 5.42s (5427ms)
+  Result: PASS (<= 60s)
+
+  Warning: No IR image found, using dummy file
+Trial 2 of 20: test_upload_20260319_174331.jpg
+Completed 50.0 KiB/50.0 KiB (73.2 KiB/s) with 1 file(s) remainingupload: tests/results/test_upload_20260319_174331.jpg to s3://fire-ml-bucket/inputs/test-latency/test_upload_20260319_174331.jpg
+  Upload time: 5.39s (5399ms)
+  Result: PASS (<= 60s)
+
+  Warning: No IR image found, using dummy file
+Trial 3 of 20: test_upload_20260319_174339.jpg
+Completed 50.0 KiB/50.0 KiB (66.7 KiB/s) with 1 file(s) remainingupload: tests/results/test_upload_20260319_174339.jpg to s3://fire-ml-bucket/inputs/test-latency/test_upload_20260319_174339.jpg
+  Upload time: 5.46s (5462ms)
+  Result: PASS (<= 60s)
+
+  Warning: No IR image found, using dummy file
+Trial 4 of 20: test_upload_20260319_174346.jpg
+Completed 50.0 KiB/50.0 KiB (419 Bytes/s) with 1 file(s) remainingupload: tests/results/test_upload_20260319_174346.jpg to s3://fire-ml-bucket/inputs/test-latency/test_upload_20260319_174346.jpg
+  Upload time: 126.62s (126623ms)
+  Result: FAIL (> 60s)
+
+  Warning: No IR image found, using dummy file
+Trial 5 of 20: test_upload_20260319_174555.jpg
+Completed 50.0 KiB/50.0 KiB (31.0 KiB/s) with 1 file(s) remainingupload: tests/results/test_upload_20260319_174555.jpg to s3://fire-ml-bucket/inputs/test-latency/test_upload_20260319_174555.jpg
+  Upload time: 6.34s (6349ms)
+  Result: PASS (<= 60s)
+
+  Warning: No IR image found, using dummy file
+Trial 6 of 20: test_upload_20260319_174603.jpg
+Completed 50.0 KiB/50.0 KiB (36.7 KiB/s) with 1 file(s) remainingupload: tests/results/test_upload_20260319_174603.jpg to s3://fire-ml-bucket/inputs/test-latency/test_upload_20260319_174603.jpg
+  Upload time: 6.08s (6082ms)
+  Result: PASS (<= 60s)
+
+  Warning: No IR image found, using dummy file
+Trial 7 of 20: test_upload_20260319_174612.jpg
+Completed 50.0 KiB/50.0 KiB (23.2 KiB/s) with 1 file(s) remainingupload: tests/results/test_upload_20260319_174612.jpg to s3://fire-ml-bucket/inputs/test-latency/test_upload_20260319_174612.jpg
+  Upload time: 6.84s (6849ms)
+  Result: PASS (<= 60s)
+
+  Warning: No IR image found, using dummy file
+Trial 8 of 20: test_upload_20260319_174620.jpg
+Completed 50.0 KiB/50.0 KiB (32.8 KiB/s) with 1 file(s) remainingupload: tests/results/test_upload_20260319_174620.jpg to s3://fire-ml-bucket/inputs/test-latency/test_upload_20260319_174620.jpg
+  Upload time: 6.24s (6245ms)
+  Result: PASS (<= 60s)
+
+  Warning: No IR image found, using dummy file
+Trial 9 of 20: test_upload_20260319_174629.jpg
+Completed 50.0 KiB/50.0 KiB (40.4 KiB/s) with 1 file(s) remainingupload: tests/results/test_upload_20260319_174629.jpg to s3://fire-ml-bucket/inputs/test-latency/test_upload_20260319_174629.jpg
+  Upload time: 5.93s (5938ms)
+  Result: PASS (<= 60s)
+
+  Warning: No IR image found, using dummy file
+Trial 10 of 20: test_upload_20260319_174637.jpg
+Completed 50.0 KiB/50.0 KiB (36.7 KiB/s) with 1 file(s) remainingupload: tests/results/test_upload_20260319_174637.jpg to s3://fire-ml-bucket/inputs/test-latency/test_upload_20260319_174637.jpg
+  Upload time: 6.08s (6088ms)
+  Result: PASS (<= 60s)
+
+  Warning: No IR image found, using dummy file
+Trial 11 of 20: test_upload_20260319_174645.jpg
+Completed 50.0 KiB/50.0 KiB (282 Bytes/s) with 1 file(s) remainingupload: tests/results/test_upload_20260319_174645.jpg to s3://fire-ml-bucket/inputs/test-latency/test_upload_20260319_174645.jpg
+  Upload time: 186.05s (186055ms)
+  Result: FAIL (> 60s)
+
+  Warning: No IR image found, using dummy file
+Trial 12 of 20: test_upload_20260319_174953.jpg
+Completed 50.0 KiB/50.0 KiB (47.5 KiB/s) with 1 file(s) remainingupload: tests/results/test_upload_20260319_174953.jpg to s3://fire-ml-bucket/inputs/test-latency/test_upload_20260319_174953.jpg
+  Upload time: 5.78s (5784ms)
+  Result: PASS (<= 60s)
+
+  Warning: No IR image found, using dummy file
+Trial 13 of 20: test_upload_20260319_175001.jpg
+Completed 50.0 KiB/50.0 KiB (44.9 KiB/s) with 1 file(s) remainingupload: tests/results/test_upload_20260319_175001.jpg to s3://fire-ml-bucket/inputs/test-latency/test_upload_20260319_175001.jpg
+  Upload time: 5.82s (5827ms)
+  Result: PASS (<= 60s)
+
+  Warning: No IR image found, using dummy file
+Trial 14 of 20: test_upload_20260319_175009.jpg
+Completed 50.0 KiB/50.0 KiB (47.5 KiB/s) with 1 file(s) remainingupload: tests/results/test_upload_20260319_175009.jpg to s3://fire-ml-bucket/inputs/test-latency/test_upload_20260319_175009.jpg
+  Upload time: 5.77s (5776ms)
+  Result: PASS (<= 60s)
+
+  Warning: No IR image found, using dummy file
+Trial 15 of 20: test_upload_20260319_175017.jpg
+Completed 50.0 KiB/50.0 KiB (52.9 KiB/s) with 1 file(s) remainingupload: tests/results/test_upload_20260319_175017.jpg to s3://fire-ml-bucket/inputs/test-latency/test_upload_20260319_175017.jpg
+  Upload time: 6.14s (6149ms)
+  Result: PASS (<= 60s)
+
+  Warning: No IR image found, using dummy file
+Trial 16 of 20: test_upload_20260319_175025.jpg
+Completed 50.0 KiB/50.0 KiB (828 Bytes/s) with 1 file(s) remainingupload: tests/results/test_upload_20260319_175025.jpg to s3://fire-ml-bucket/inputs/test-latency/test_upload_20260319_175025.jpg
+  Upload time: 66.61s (66617ms)
+  Result: FAIL (> 60s)
+
+  Warning: No IR image found, using dummy file
+Trial 17 of 20: test_upload_20260319_175134.jpg
+Completed 50.0 KiB/50.0 KiB (282 Bytes/s) with 1 file(s) remainingupload: tests/results/test_upload_20260319_175134.jpg to s3://fire-ml-bucket/inputs/test-latency/test_upload_20260319_175134.jpg
+  Upload time: 185.69s (185699ms)
+  Result: FAIL (> 60s)
+
+  Warning: No IR image found, using dummy file
+Trial 18 of 20: test_upload_20260319_175441.jpg
+Completed 50.0 KiB/50.0 KiB (75.8 KiB/s) with 1 file(s) remainingupload: tests/results/test_upload_20260319_175441.jpg to s3://fire-ml-bucket/inputs/test-latency/test_upload_20260319_175441.jpg
+  Upload time: 5.38s (5387ms)
+  Result: PASS (<= 60s)
+
+  Warning: No IR image found, using dummy file
+Trial 19 of 20: test_upload_20260319_175449.jpg
+Completed 50.0 KiB/50.0 KiB (78.1 KiB/s) with 1 file(s) remainingupload: tests/results/test_upload_20260319_175449.jpg to s3://fire-ml-bucket/inputs/test-latency/test_upload_20260319_175449.jpg
+  Upload time: 5.35s (5356ms)
+  Result: PASS (<= 60s)
+
+  Warning: No IR image found, using dummy file
+Trial 20 of 20: test_upload_20260319_175456.jpg
+Completed 50.0 KiB/50.0 KiB (74.1 KiB/s) with 1 file(s) remainingupload: tests/results/test_upload_20260319_175456.jpg to s3://fire-ml-bucket/inputs/test-latency/test_upload_20260319_175456.jpg
+  Upload time: 5.40s (5402ms)
+  Result: PASS (<= 60s)
+
+========================================
+SUMMARY
+  Trials:  20
+  PASS:    16
+  FAIL:    4
+  OVERALL: FAIL
+========================================

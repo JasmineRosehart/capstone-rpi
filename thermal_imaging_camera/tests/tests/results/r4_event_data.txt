@@ -2,32 +2,9 @@
 TEST R4: Event Data Recording
 Requirement: Each capture records time,
              GPS location, and image data
-Date: Wed 18 Mar 20:36:45 EDT 2026
+Date: Thu 19 Mar 18:07:22 EDT 2026
 ========================================
 
---- 1. Timestamp Synchronization ---
-Verifying IR and RGB images share timestamps...
-
-  No IR images found. Run the app and capture at least one image first.
-
---- 2. GPS EXIF in IR Images ---
-
-  No IR images found.
-
---- 3. GPS EXIF in RGB Images ---
-
-  No RGB images found.
-
---- 4. S3 Cloud Storage Verification ---
-
-  IR images in S3:  5
-  RGB images in S3: 17
-  S3 upload verified — PASS
-
-========================================
-SUMMARY
-  Checks: 1
-  PASS:   1
-  FAIL:   0
-  OVERALL: PASS
-========================================
+ERROR: raspberrypi_video is not running.
+Start it first with:
+  sudo nice -n -20 ./raspberrypi_video -tl 3

@@ -1,0 +1,13 @@
+========================================
+TEST R5: Continuous Operation
+Requirement: Operate >= 12 hours continuously
+Target duration: 60 minutes
+Check interval:  60 seconds
+Start time: Thu 19 Mar 18:40:59 EDT 2026
+========================================
+
+App detected. Beginning monitoring...
+
+Timestamp                 T+min      App Status      CPU%       Mem(MB)      Temp(C)   
+------------------------- --------   --------------- --------   ----------   --------  
+2026-03-19 18:40:59       1          RUNNING         57.4       110.6        65.0      
