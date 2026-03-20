@@ -1,0 +1,40 @@
+========================================
+TEST C3: Power Consumption
+Requirement: Total system power <= 50W
+Date: Thu 19 Mar 21:47:17 EDT 2026
+========================================
+
+--- Component Power (from datasheets) ---
+
+Component                           Power (W) 
+---                                 ---       
+Raspberry Pi 3B (full load)         3.7       
+FLIR Lepton 3.5                     0.15      
+Pi Camera Module 2                  0.25      
+GY-NEO6MV2 GPS module               0.045     
+HDMI display (external)             2.5       
+
+--- Calculated Totals ---
+
+  Without display: 4.145W
+  With display:    6.645W
+  Limit:           50W
+
+--- Live CPU Measurements (5 samples) ---
+
+  App not running — start it for live measurements
+  (Static datasheet analysis only)
+
+--- Measurement Instructions ---
+  For exact measurement use a USB power meter:
+  1. Insert USB power meter between charger and Pi
+  2. Run app at full load: sudo nice -n -20 ./raspberrypi_video -tl 3
+  3. Record: Voltage (V) x Current (A) = Power (W)
+  Expected: ~5V x 0.8-1.2A = 4-6W
+
+========================================
+SUMMARY
+  Estimated total (with display): 6.645W
+  Limit: 50W
+  OVERALL: PASS (6.645W << 50W)
+========================================
