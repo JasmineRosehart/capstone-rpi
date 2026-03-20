@@ -123,7 +123,7 @@ echo "  Heat detected:   $PASS"                  | tee -a "$OUTFILE"
 echo "  Not detected:    $FAIL"                  | tee -a "$OUTFILE"
 echo ""                                          | tee -a "$OUTFILE"
 echo "  For full R1 verification:"               | tee -a "$OUTFILE"
-echo "  Capture images at 0.5m, 1m, 2m, 5m, 10m" | tee -a "$OUTFILE"
+echo "  Capture images at 0.5m, 1m, 2m, 3m, 5m, 10m, 15m" | tee -a "$OUTFILE"
 echo "  and rename to ir_images/ir_Xm.jpg"       | tee -a "$OUTFILE"
 [ "$FAIL" -eq 0 ] && [ "$TOTAL" -gt 0 ] \
     && echo "  OVERALL: PASS" | tee -a "$OUTFILE" \
