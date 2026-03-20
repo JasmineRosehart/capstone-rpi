@@ -1,0 +1,22 @@
+========================================
+TEST R1: Heat Source Detection Range
+Requirement: Detect heat sources within 50m
+Date: Thu 19 Mar 21:30:47 EDT 2026
+========================================
+
+No distance-labeled images found.
+Looking for regular IR images instead...
+
+No IR images found.
+
+========================================
+SUMMARY
+  Images analyzed: 0
+  Heat detected:   0
+  Not detected:    0
+
+  For full R1 verification:
+  Capture images at 0.5m, 1m, 2m, 3m, 5m, 10m, 15m
+  and rename to ir_images/ir_Xm.jpg
+  OVERALL: PARTIAL / UNTESTED
+========================================
